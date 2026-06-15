@@ -35,6 +35,21 @@ import json
 import os
 import sys
 import time
+import csv
+import glob
+import io
+import json
+import os
+import sys
+import time
+
+# If pympp/requests aren't on the system Python, pick them up from the venv
+_venv = os.path.expanduser("~/.baselight/venv")
+_site_pkgs = glob.glob(os.path.join(_venv, "lib", "python*", "site-packages"))
+for _sp in _site_pkgs:
+    if _sp not in sys.path:
+        sys.path.insert(0, _sp)
+
 import requests
 
 MCP_URL = "https://api.baselight.app/mcp"
@@ -151,8 +166,9 @@ class BaselightClient:
                 'Install with: pip install "pympp[tempo,mcp]"'
             )
         account = TempoAccount.from_key(self.mpp_private_key)
-        method = tempo(account=account, intents={"charge": ChargeIntent()})
         mcp_challenge = MCPChallenge.from_dict(challenge)
+        chain_id = (challenge.get("request") or {}).get("methodDetails", {}).get("chainId")
+        method = tempo(account=account, intents={"charge": ChargeIntent()}, chain_id=chain_id)
         core_cred = asyncio.run(method.create_credential(mcp_challenge.to_core()))
         return MCPCredential.from_core(core_cred, mcp_challenge).to_meta()
 

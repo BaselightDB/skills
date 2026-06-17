@@ -13,6 +13,17 @@ Example triggers:
 
 ## Installation
 
+### Claude Code plugin
+
+This repository doubles as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces). Installing the plugin gives you the skill **and** a connection to the remote Baselight MCP server in one step:
+
+```
+/plugin marketplace add baselightdb/skills
+/plugin install baselight@baselight
+```
+
+The plugin bundles the same `skills/baselight` skill shipped in this repo (no files are duplicated) plus an MCP entry for `https://api.baselight.app/mcp`. See [Setup](#setup) for the API key.
+
 ### npx installation
 
 ```
@@ -43,16 +54,24 @@ echo 'BASELIGHT_API_KEY=your-key-here' >> ~/.baselight/credentials
 chmod 600 ~/.baselight/credentials
 ```
 
+Both the skill and the bundled MCP server resolve the key the same way: the `BASELIGHT_API_KEY` environment variable takes precedence, falling back to `~/.baselight/credentials`. The plugin reads the key with an inline `headersHelper` command that Claude Code runs when connecting to the MCP server, so the same credentials work for both paths with no extra setup.
+
 ## Structure
 
 ```
-skills/baselight/
-├── SKILL.md                    # Skill definition and instructions for Claude
-├── scripts/
-│   └── baselight.py            # Python MCP client (no extra deps beyond requests)
-└── references/
-    └── sql-patterns.md         # DuckDB SQL reference and examples
+.
+├── .claude-plugin/
+│   ├── marketplace.json        # Plugin marketplace catalog (this repo as its own marketplace)
+│   └── plugin.json             # Plugin manifest: sources skills/ + the remote MCP server
+└── skills/baselight/
+    ├── SKILL.md                # Skill definition and instructions for Claude
+    ├── scripts/
+    │   └── baselight.py        # Python MCP client (no extra deps beyond requests)
+    └── references/
+        └── sql-patterns.md     # DuckDB SQL reference and examples
 ```
+
+The plugin uses a marketplace-root source (`"source": "./"`), so the plugin and the skill share the existing `skills/` directory — the skill files are never duplicated.
 
 ## Requirements
 

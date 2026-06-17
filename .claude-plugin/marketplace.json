@@ -1,0 +1,25 @@
+{
+  "name": "baselight",
+  "owner": {
+    "name": "Baselight",
+    "email": "hello@baselight.ai"
+  },
+  "description": "Baselight for Claude Code: query public datasets with SQL, via a bundled skill and the remote MCP server.",
+  "plugins": [
+    {
+      "name": "baselight",
+      "source": "./",
+      "description": "Query thousands of public Baselight datasets (crypto, finance, climate, and more) with DuckDB SQL. Bundles the skill and the remote MCP server.",
+      "category": "data",
+      "keywords": [
+        "baselight",
+        "data",
+        "datasets",
+        "sql",
+        "duckdb",
+        "analytics",
+        "mcp"
+      ]
+    }
+  ]
+}

@@ -54,7 +54,11 @@ echo 'BASELIGHT_API_KEY=your-key-here' >> ~/.baselight/credentials
 chmod 600 ~/.baselight/credentials
 ```
 
-Both the skill and the bundled MCP server resolve the key the same way: the `BASELIGHT_API_KEY` environment variable takes precedence, falling back to `~/.baselight/credentials`. The plugin reads the key with an inline `headersHelper` command that Claude Code runs when connecting to the MCP server, so the same credentials work for both paths with no extra setup.
+When you install the **plugin**, Claude Code prompts for the API key and stores it in the system keychain. The MCP server uses it directly, and a `SessionStart` hook mirrors it into `~/.baselight/credentials` (replacing only the `BASELIGHT_API_KEY` line and leaving anything else intact) so the bundled **skill** — which reads that file — uses the same key. One prompt covers both.
+
+Leave the prompt blank to manage credentials yourself: the hook becomes a no-op, and both the skill and the MCP server fall back to the `BASELIGHT_API_KEY` environment variable, then `~/.baselight/credentials`.
+
+> **Note:** entering the key at the prompt writes it to `~/.baselight/credentials` in plaintext (in addition to the keychain), because the skill's script reads it from there.
 
 ## Structure
 

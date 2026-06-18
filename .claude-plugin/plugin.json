@@ -1,0 +1,29 @@
+{
+  "name": "baselight",
+  "description": "Query thousands of public Baselight datasets (crypto, finance, climate, and more) with DuckDB SQL. Bundles the skill and the remote MCP server.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Baselight",
+    "email": "hello@baselight.ai"
+  },
+  "homepage": "https://baselight.ai",
+  "repository": "https://github.com/BaselightDB/skills",
+  "license": "MIT",
+  "keywords": [
+    "baselight",
+    "data",
+    "datasets",
+    "sql",
+    "duckdb",
+    "analytics",
+    "mcp"
+  ],
+  "mcpServers": {
+    "baselight": {
+      "type": "http",
+      "url": "https://api.baselight.app/mcp",
+      "//": "Resolves the API key like the skill (BASELIGHT_API_KEY env var, else ~/.baselight/credentials) as the x-api-key header.",
+      "headersHelper": "k=\"$BASELIGHT_API_KEY\"; if [ -z \"$k\" ] && [ -f \"$HOME/.baselight/credentials\" ]; then k=$(grep -m1 '^BASELIGHT_API_KEY=' \"$HOME/.baselight/credentials\" | cut -d= -f2- | tr -d '[:space:]'); fi; printf '{\"x-api-key\":\"%s\"}' \"$k\""
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "baselight",
   "description": "Query thousands of public Baselight datasets (crypto, finance, climate, and more) with DuckDB SQL. Bundles the skill and the remote MCP server.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Baselight",
     "email": "hello@baselight.ai"
@@ -18,12 +18,33 @@
     "analytics",
     "mcp"
   ],
+  "userConfig": {
+    "baselight_api_key": {
+      "type": "string",
+      "title": "Baselight API key",
+      "description": "Used to authenticate the MCP server. Leave blank to fall back to the BASELIGHT_API_KEY environment variable or ~/.baselight/credentials. Get a key at baselight.app → Account Settings → Integrations.",
+      "sensitive": true
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "//": "If a key was entered at install (userConfig), mirror it into ~/.baselight/credentials — replacing only the BASELIGHT_API_KEY line, preserving anything else — so the bundled skill (which reads that file) uses the same key as the MCP server. A blank prompt is a no-op, leaving hand-managed credentials untouched.",
+            "type": "command",
+            "command": "key='${user_config.baselight_api_key}'; [ -z \"$key\" ] && exit 0; d=\"$HOME/.baselight\"; f=\"$d/credentials\"; mkdir -p \"$d\"; t=$(grep -v '^BASELIGHT_API_KEY=' \"$f\" 2>/dev/null); { [ -n \"$t\" ] && printf '%s\\n' \"$t\"; printf 'BASELIGHT_API_KEY=%s\\n' \"$key\"; } > \"$f\"; chmod 600 \"$f\""
+          }
+        ]
+      }
+    ]
+  },
   "mcpServers": {
     "baselight": {
       "type": "http",
       "url": "https://api.baselight.app/mcp",
-      "//": "Resolves the API key like the skill (BASELIGHT_API_KEY env var, else ~/.baselight/credentials) as the x-api-key header.",
-      "headersHelper": "k=\"$BASELIGHT_API_KEY\"; if [ -z \"$k\" ] && [ -f \"$HOME/.baselight/credentials\" ]; then k=$(grep -m1 '^BASELIGHT_API_KEY=' \"$HOME/.baselight/credentials\" | cut -d= -f2- | tr -d '[:space:]'); fi; printf '{\"x-api-key\":\"%s\"}' \"$k\""
+      "//": "Resolves the x-api-key three ways: the key entered at install (userConfig), else $BASELIGHT_API_KEY, else ~/.baselight/credentials — matching the skill's flexibility. Plain $VAR (no braces) is left for the shell.",
+      "headersHelper": "k=\"${user_config.baselight_api_key}\"; [ -z \"$k\" ] && k=\"$BASELIGHT_API_KEY\"; if [ -z \"$k\" ] && [ -f \"$HOME/.baselight/credentials\" ]; then k=$(grep -m1 '^BASELIGHT_API_KEY=' \"$HOME/.baselight/credentials\" | cut -d= -f2- | tr -d '[:space:]'); fi; printf '{\"x-api-key\":\"%s\"}' \"$k\""
     }
   }
 }
